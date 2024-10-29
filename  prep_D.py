@@ -1,4 +1,4 @@
-#Visualizza i contenuti all'interno della tabella
+
 import mysql.connector
 
 mydb = mysql.connector.connect(
