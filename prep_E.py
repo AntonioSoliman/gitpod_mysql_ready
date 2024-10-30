@@ -1,6 +1,5 @@
 import mysql.connector
 
-
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -9,24 +8,23 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
+mycursor.execute("ALTER TABLE Mammiferi MODIFY COLUMN id INT AUTO_INCREMENT PRIMARY KEY")
 
 def inserisci_animale():
     try:
-        id = int(input("Inserisci ID: "))
         nome_proprio = input("Inserisci il nome proprio: ")
         razza = input("Inserisci la razza: ")
         peso = int(input("Inserisci il peso (in kg): "))
         eta = int(input("Inserisci l'età: "))
         
-        sql = "INSERT INTO Mammiferi (id, Nome_Proprio, Razza, Peso, Eta) VALUES (%s, %s, %s, %s, %s)"
-        val = (id, nome_proprio, razza, peso, eta)
+        sql = "INSERT INTO Mammiferi (Nome_Proprio, Razza, Peso, Eta) VALUES (%s, %s, %s, %s)"
+        val = (nome_proprio, razza, peso, eta)
         
         mycursor.execute(sql, val)
         mydb.commit()
         print(f"{mycursor.rowcount} animale inserito con successo.")
     except ValueError:
-        print("Errore: Inserire valori interi validi per ID, Peso ed Età.")
-
+        print("Errore: Inserire valori interi validi per Peso ed Età.")
 
 def visualizza_animali():
     mycursor.execute("SELECT * FROM Mammiferi")
@@ -48,7 +46,6 @@ def elimina_animale():
     mydb.commit()
     print(f"Animale con ID {id} eliminato con successo.")
 
-
 def modifica_animale():
     id = int(input("Inserisci l'ID dell'animale da modificare: "))
     nome_proprio = input("Inserisci il nuovo nome proprio: ")
@@ -61,7 +58,6 @@ def modifica_animale():
     mycursor.execute(sql, val)
     mydb.commit()
     print(f"Animale con ID {id} modificato con successo.")
-
 
 def menu():
     while True:
@@ -95,9 +91,7 @@ def menu():
         else:
             print("Opzione non valida, riprova.")
 
-
 menu()
-
 
 mycursor.close()
 mydb.close()
