@@ -8,7 +8,7 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
-mycursor.execute("ALTER TABLE Mammiferi MODIFY COLUMN id INT AUTO_INCREMENT PRIMARY KEY")
+
 
 def inserisci_animale():
     try:
