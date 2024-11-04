@@ -4,7 +4,6 @@ from mysql.connector import Error
 
 app = Flask(__name__)
 
-
 db_config = {
     'host': 'localhost',      
     'user': 'root',     
@@ -12,19 +11,36 @@ db_config = {
     'database': 'Animali'  
 }
 
-
 @app.route('/dati', methods=['GET'])
-def get_data():
+@app.route('/dati/<filtro>/<valore>', methods=['GET'])
+@app.route('/dati/<filtro>/<valore_min>/<valore_max>', methods=['GET'])
+def get_data(filtro=None, valore=None, valore_min=None, valore_max=None):
     try:
-      
+       
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
-
+        
        
-        cursor.execute("SELECT * FROM Mammiferi")  
+        query = "SELECT * FROM Mammiferi"
+        params = ()
+
+        
+        if filtro and valore and not valore_min and not valore_max:
+            if filtro in ['Nome_proprio', 'Età', 'Razza', 'Peso', 'Id']:
+                query += f" WHERE {filtro} = %s"
+                params = (valore,)
+
+        
+        elif filtro and valore_min and valore_max:
+            if filtro in ['Età', 'Peso', 'Id']:  
+                query += f" WHERE {filtro} BETWEEN %s AND %s"
+                params = (valore_min, valore_max)
+        
+      
+        cursor.execute(query, params)
         result = cursor.fetchall()
 
-       
+      
         return jsonify(result)
     
     except Error as e:
@@ -37,5 +53,4 @@ def get_data():
             conn.close()
 
 if __name__ == "__main__":
-    
     app.run()
