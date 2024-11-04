@@ -26,13 +26,13 @@ def get_data(filtro=None, valore=None, valore_min=None, valore_max=None):
 
         
         if filtro and valore and not valore_min and not valore_max:
-            if filtro in ['Nome_proprio', 'Età', 'Razza', 'Peso', 'Id']:
+            if filtro in ['Nome_Proprio', 'Eta', 'Razza', 'Peso', 'Id']:
                 query += f" WHERE {filtro} = %s"
                 params = (valore,)
 
         
         elif filtro and valore_min and valore_max:
-            if filtro in ['Età', 'Peso', 'Id']:  
+            if filtro in ['Eta', 'Peso', 'Id']:  
                 query += f" WHERE {filtro} BETWEEN %s AND %s"
                 params = (valore_min, valore_max)
         
