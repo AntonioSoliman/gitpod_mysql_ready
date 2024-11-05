@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
 
 app = Flask(__name__)
-CORS(app)
+
 db_config = {
     'host': 'localhost',      
     'user': 'root',     
@@ -52,7 +51,6 @@ def get_data(filtro=None, valore=None, valore_min=None, valore_max=None):
 def create_animal():
     data = request.get_json()
 
-    
     nome_proprio = data.get('Nome_Proprio')
     eta = data.get('Eta')
     razza = data.get('Razza')
@@ -65,7 +63,6 @@ def create_animal():
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
 
-       
         query = "INSERT INTO Mammiferi (Nome_Proprio, Eta, Razza, Peso) VALUES (%s, %s, %s, %s)"
         cursor.execute(query, (nome_proprio, eta, razza, peso))
         conn.commit()
@@ -75,6 +72,66 @@ def create_animal():
     except Error as e:
         print("Errore nella connessione al database:", e)
         return jsonify({"errore": "Impossibile inserire l'animale nel database"}), 500
+    
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@app.route('/dati/aggiorna/<int:id>', methods=['PUT'])
+def update_animal(id):
+    data = request.get_json()
+
+    nome_proprio = data.get('Nome_Proprio')
+    eta = data.get('Eta')
+    razza = data.get('Razza')
+    peso = data.get('Peso')
+
+    if not nome_proprio or not eta or not razza or not peso:
+        return jsonify({"errore": "Tutti i campi (Nome_Proprio, Eta, Razza, Peso) sono obbligatori"}), 400
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        query = "UPDATE Mammiferi SET Nome_Proprio = %s, Eta = %s, Razza = %s, Peso = %s WHERE Id = %s"
+        cursor.execute(query, (nome_proprio, eta, razza, peso, id))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"errore": "Animale non trovato"}), 404
+
+        return jsonify({"successo": "Animale aggiornato"}), 200
+    
+    except Error as e:
+        print("Errore nella connessione al database:", e)
+        return jsonify({"errore": "Impossibile aggiornare l'animale nel database"}), 500
+    
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@app.route('/dati/elimina/<int:id>', methods=['DELETE'])
+def delete_animal(id):
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        query = "DELETE FROM Mammiferi WHERE Id = %s"
+        cursor.execute(query, (id,))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"errore": "Animale non trovato"}), 404
+
+        return jsonify({"successo": "Animale eliminato"}), 200
+    
+    except Error as e:
+        print("Errore nella connessione al database:", e)
+        return jsonify({"errore": "Impossibile eliminare l'animale nel database"}), 500
     
     finally:
         if conn.is_connected():
